@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template_string, send_file
+from flask import Flask, request, jsonify, render_template_string, send_file, send_from_directory
 from flask_cors import CORS
 import joblib
 import numpy as np
@@ -35,6 +35,20 @@ except ImportError:
 
 app = Flask(__name__)
 CORS(app)
+
+# ==================== FRONTEND ROUTES ====================
+
+# Serve the main frontend page
+@app.route('/')
+def home():
+    frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+    return send_from_directory(frontend_dir, 'index.html')
+
+# Serve CSS, JavaScript, and other frontend assets
+@app.route('/<path:filename>')
+def frontend_files(filename):
+    frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+    return send_from_directory(frontend_dir, filename)
 
 # Configuration
 API_URL = 'http://localhost:5000'
