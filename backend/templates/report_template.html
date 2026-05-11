@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Cardiovascular Risk Assessment Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+            font-size: 11pt;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            color: #1e40af;
+            margin: 0;
+            font-size: 24pt;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            font-size: 10pt;
+            margin-top: 5px;
+        }
+        
+        .risk-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .risk-score {
+            font-size: 60pt;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .risk-high { color: #dc2626; }
+        .risk-moderate { color: #ea580c; }
+        .risk-low { color: #16a34a; }
+        
+        .section {
+            margin: 25px 0;
+            page-break-inside: avoid;
+        }
+        
+        h2 {
+            color: #1e40af;
+            border-left: 4px solid #2563eb;
+            padding-left: 15px;
+            font-size: 14pt;
+            margin-top: 0;
+        }
+        
+        .feature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+        
+        .feature-table th {
+            background: #e0e7ff;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .feature-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .positive { color: #dc2626; font-weight: 600; }
+        .negative { color: #16a34a; font-weight: 600; }
+        
+        .cf-box {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .cf-title {
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 12pt;
+        }
+        
+        .action-item {
+            background: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            font-size: 10pt;
+        }
+        
+        .metrics-grid {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .metric-box {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .metric-label {
+            font-size: 9pt;
+            color: #64748b;
+            display: block;
+        }
+        
+        .metric-value {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 9pt;
+            color: #64748b;
+            text-align: center;
+        }
+        
+        .disclaimer {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 30px;
+            font-size: 9pt;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🫀</div>
+        <h1>Cardiovascular Risk Assessment Report</h1>
+        <div class="subtitle">Generated on {{ generated_date }} | AI-Powered Analysis</div>
+    </div>
+
+    <div class="risk-section">
+        <h3>Current Risk Assessment</h3>
+        {% set prob = prediction.probability.cvd * 100 %}
+        <div class="risk-score {% if prob > 70 %}risk-high{% elif prob > 30 %}risk-moderate{% else %}risk-low{% endif %}">
+            {{ "%.0f"|format(prob) }}%
+        </div>
+        <p><strong>{{ prediction.risk_level.level.upper() }} RISK</strong></p>
+        <p>{{ prediction.risk_level.message }}</p>
+        
+        <div class="metrics-grid">
+            <div class="metric-box">
+                <span class="metric-label">Age</span>
+                <span class="metric-value">{{ patient_metrics.age_years }} years</span>
+            </div>
+            <div class="metric-box">
+                <span class="metric-label">BMI</span>
+                <span class="metric-value">{{ "%.1f"|format(patient_metrics.bmi) }}</span>
+            </div>
+            <div class="metric-box">
+                <span class="metric-label">Blood Pressure</span>
+                <span class="metric-value">{{ patient_metrics.bp_category }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔍 Key Risk Factors</h2>
+        <p style="font-size: 10pt; color: #64748b;">Based on SHAP analysis, these features most influenced your risk score:</p>
+        <table class="feature-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Feature</th>
+                    <th>Your Value</th>
+                    <th>Impact on Risk</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for feat in top_features %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ feat.feature }}</td>
+                    <td>{{ feat.value }}</td>
+                    <td class="{% if feat.contribution > 0 %}positive{% else %}negative{% endif %}">
+                        {% if feat.contribution > 0 %}+{% endif %}{{ "%.3f"|format(feat.contribution) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if cf_summary and cf_summary.outcome %}
+    <div class="section">
+        <h2>💡 Personalized Recommendations</h2>
+        <div class="cf-box">
+            <div class="cf-title">How to Reduce Your Risk</div>
+            <p style="font-size: 11pt; margin-bottom: 15px;"><strong>{{ cf_summary.outcome }}</strong></p>
+            <p style="font-size: 10pt; color: #92400e; margin-bottom: 15px;"><em>{{ cf_summary.impact }}</em></p>
+            
+            <div>
+                <strong style="font-size: 10pt;">Recommended Actions:</strong>
+                {% for action in cf_summary.action_items %}
+                <div class="action-item">{{ action }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <h2>📊 Complete Health Profile</h2>
+        <table class="feature-table">
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                    <th>Reference Range</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Age</td>
+                    <td>{{ patient_metrics.age_years }} years</td>
+                    <td>Adult</td>
+                </tr>
+                <tr>
+                    <td>Gender</td>
+                    <td>{{ 'Male' if patient.gender == 2 else 'Female' }}</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Height</td>
+                    <td>{{ patient.height }} cm</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Weight</td>
+                    <td>{{ patient.weight }} kg</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>BMI</td>
+                    <td>{{ "%.1f"|format(patient_metrics.bmi) }}</td>
+                    <td>18.5 - 24.9 (Normal)</td>
+                </tr>
+                <tr>
+                    <td>Systolic BP</td>
+                    <td>{{ patient.ap_hi }} mmHg</td>
+                    <td>&lt; 120 mmHg (Normal)</td>
+                </tr>
+                <tr>
+                    <td>Diastolic BP</td>
+                    <td>{{ patient.ap_lo }} mmHg</td>
+                    <td>&lt; 80 mmHg (Normal)</td>
+                </tr>
+                <tr>
+                    <td>Cholesterol Level</td>
+                    <td>{{ 'Normal' if patient.cholesterol == 1 else 'Above Normal' if patient.cholesterol == 2 else 'High' }}</td>
+                    <td>Normal</td>
+                </tr>
+                <tr>
+                    <td>Glucose Level</td>
+                    <td>{{ 'Normal' if patient.gluc == 1 else 'Above Normal' if patient.gluc == 2 else 'High' }}</td>
+                    <td>Normal</td>
+                </tr>
+                <tr>
+                    <td>Smoking</td>
+                    <td>{{ 'Yes' if patient.smoke == 1 else 'No' }}</td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <td>Alcohol Consumption</td>
+                    <td>{{ 'Yes' if patient.alco == 1 else 'No' }}</td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <td>Physical Activity</td>
+                    <td>{{ 'Yes' if patient.active == 1 else 'No' }}</td>
+                    <td>Yes</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="disclaimer">
+        <strong>Medical Disclaimer:</strong> This report is generated by an AI system for educational purposes only. 
+        It does not constitute medical advice, diagnosis, or treatment. Always consult with a qualified healthcare 
+        provider for medical decisions. Do not disregard professional medical advice based on this report. 
+        In case of emergency, call your local emergency services immediately.
+    </div>
+
+    <div class="footer">
+        <p><strong>CardioXAI - Explainable AI for Healthcare</strong></p>
+        <p>This report uses SHAP (SHapley Additive exPlanations) and DiCE (Diverse Counterfactual Explanations) 
+        to ensure transparency and actionable insights.</p>
+        <p style="margin-top: 10px;">© {{ generated_date.split(' ')[-1] }} CardioXAI. All rights reserved.</p>
+    </div>
+</body>
+</html>

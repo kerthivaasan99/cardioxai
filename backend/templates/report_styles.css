@@ -1,0 +1,22 @@
+/* Additional print-specific styles for WeasyPrint */
+@page {
+    size: A4;
+    margin: 20mm;
+    
+    @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #64748b;
+    }
+}
+
+body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Ensure backgrounds print */
+* {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}

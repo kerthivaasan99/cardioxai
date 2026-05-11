@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardioXAI - AI Cardiovascular Risk Assessment</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="particles-container" id="particles"></div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-brand">
+                <div class="logo-pulse">
+                    <span class="logo-icon">🫀</span>
+                    <div class="pulse-ring"></div>
+                </div>
+                <div class="brand-text">
+                    <h1>CardioXAI</h1>
+                    <p class="brand-tagline">Explainable AI for Cardiovascular Risk Assessment</p>
+                </div>
+            </div>
+            
+            <div class="system-status">
+                <div class="status-item" id="modelStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-label">AI Model</span>
+                    <span class="status-value">Checking...</span>
+                </div>
+                <div class="status-item" id="shapStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-label">SHAP</span>
+                    <span class="status-value">Checking...</span>
+                </div>
+                <div class="status-item" id="limeStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-label">LIME</span>
+                    <span class="status-value">Checking...</span>
+                </div>
+                <div class="status-item" id="cfStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-label">Counterfactual</span>
+                    <span class="status-value">Checking...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Input Section -->
+            <section class="input-panel glass-card" id="inputSection">
+                <div class="panel-header">
+                    <div class="panel-icon">📋</div>
+                    <h2>Patient Information</h2>
+                </div>
+                
+                <form id="patientForm" class="patient-form">
+                    <div class="form-grid">
+                        <div class="form-group floating">
+                            <input type="number" id="age" name="age" min="20" max="100" value="50" required placeholder=" ">
+                            <label for="age">Age (years)</label>
+                            <span class="input-focus-border"></span>
+                        </div>
+                        
+                        <div class="form-group floating">
+                            <select id="gender" name="gender" required>
+                                <option value="1">Female</option>
+                                <option value="2" selected>Male</option>
+                            </select>
+                            <label for="gender">Gender</label>
+                            <span class="input-focus-border"></span>
+                        </div>
+
+                        <div class="form-group floating">
+                            <input type="number" id="height" name="height" min="100" max="250" value="170" required placeholder=" ">
+                            <label for="height">Height (cm)</label>
+                            <span class="input-focus-border"></span>
+                        </div>
+
+                        <div class="form-group floating">
+                            <input type="number" id="weight" name="weight" min="30" max="200" value="75" required placeholder=" ">
+                            <label for="weight">Weight (kg)</label>
+                            <span class="input-focus-border"></span>
+                        </div>
+
+                        <div class="form-group floating">
+                            <input type="number" id="ap_hi" name="ap_hi" min="90" max="200" value="130" required placeholder=" ">
+                            <label for="ap_hi">Systolic BP (mmHg)</label>
+                            <span class="input-focus-border"></span>
+                        </div>
+
+                        <div class="form-group floating">
+                            <input type="number" id="ap_lo" name="ap_lo" min="60" max="140" value="85" required placeholder=" ">
+                            <label for="ap_lo">Diastolic BP (mmHg)</label>
+                            <span class="input-focus-border"></span>
+                        </div>
+
+                        <div class="form-group floating">
+                            <select id="cholesterol" name="cholesterol" required>
+                                <option value="1">Normal</option>
+                                <option value="2" selected>Above Normal</option>
+                                <option value="3">Well Above Normal</option>
+                            </select>
+                            <label for="cholesterol">Cholesterol Level</label>
+                            <span class="input-focus-border"></span>
+                        </div>
+
+                        <div class="form-group floating">
+                            <select id="gluc" name="gluc" required>
+                                <option value="1">Normal</option>
+                                <option value="2" selected>Above Normal</option>
+                                <option value="3">Well Above Normal</option>
+                            </select>
+                            <label for="gluc">Glucose Level</label>
+                            <span class="input-focus-border"></span>
+                        </div>
+
+                        <div class="form-group toggle-modern">
+                            <label class="toggle-switch-modern">
+                                <input type="checkbox" id="smoke" name="smoke" value="1">
+                                <span class="toggle-slider-modern">
+                                    <span class="toggle-knob"></span>
+                                </span>
+                                <span class="toggle-label">Smoker</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group toggle-modern">
+                            <label class="toggle-switch-modern">
+                                <input type="checkbox" id="alco" name="alco" value="1">
+                                <span class="toggle-slider-modern">
+                                    <span class="toggle-knob"></span>
+                                </span>
+                                <span class="toggle-label">Alcohol Consumer</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group toggle-modern">
+                            <label class="toggle-switch-modern">
+                                <input type="checkbox" id="active" name="active" value="1" checked>
+                                <span class="toggle-slider-modern">
+                                    <span class="toggle-knob"></span>
+                                </span>
+                                <span class="toggle-label">Physically Active</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="analyze-btn-glow">
+                        <span class="btn-icon-ai">🔍</span>
+                        <span class="btn-text">Analyze Risk</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Results Dashboard -->
+            <section class="results-dashboard" id="resultsSection" style="display: none;">
+                <!-- Risk Analytics Panel -->
+                <div class="dashboard-grid">
+                    <!-- Main Risk Card -->
+                    <div class="glass-card risk-analytics-card">
+                        <div class="card-header">
+                            <h3>Risk Analytics</h3>
+                            <div class="risk-badge" id="riskBadge">Calculating...</div>
+                        </div>
+                        
+                        <div class="risk-visualization">
+                            <div class="gauge-container">
+                                <canvas id="gaugeChart"></canvas>
+                                <div class="gauge-center">
+                                    <div class="risk-percentage" id="riskPercentage">0%</div>
+                                    <div class="risk-label" id="riskLevelText">Analyzing...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metrics-row">
+                            <div class="metric-card" id="healthScoreCard">
+                                <div class="metric-ring">
+                                    <svg viewBox="0 0 36 36">
+                                        <path class="metric-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path class="metric-ring-fill" id="healthScoreRing" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    </svg>
+                                    <div class="metric-value-center" id="healthScoreValue">--</div>
+                                </div>
+                                <span class="metric-title">Health Score</span>
+                            </div>
+
+                            <div class="metric-card confidence-card">
+                                <div class="confidence-bar-container">
+                                    <div class="confidence-bar" id="confidenceBar"></div>
+                                    <span class="confidence-value" id="confidenceValue">--%</span>
+                                </div>
+                                <span class="metric-title">AI Confidence</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Patient Metrics -->
+                    <div class="glass-card patient-metrics-card">
+                        <div class="card-header">
+                            <h3>Patient Metrics</h3>
+                        </div>
+                        <div class="metrics-grid" id="patientMetrics">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Clinical Insight -->
+                <div class="glass-card insight-card">
+                    <div class="card-header">
+                        <div class="ai-badge">
+                            <span class="ai-icon">🤖</span>
+                            <span>AI Clinical Insight</span>
+                        </div>
+                    </div>
+                    <div class="insight-content" id="clinicalInsight">
+                        <div class="insight-loading">
+                            <div class="typing-indicator">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <p>Generating clinical analysis...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explainable AI Analysis -->
+                <div class="glass-card xai-card">
+                    <div class="card-header">
+                        <h3>Explainable AI Analysis</h3>
+                    </div>
+                    
+                    <div class="xai-tabs">
+                        <button class="xai-tab active" data-tab="shap" onclick="switchTab('shap')">
+                            <span class="tab-icon">📊</span>
+                            SHAP Explanation
+                        </button>
+                        <button class="xai-tab" data-tab="lime" onclick="switchTab('lime')">
+                            <span class="tab-icon">🔍</span>
+                            LIME Analysis
+                        </button>
+                    </div>
+
+                    <!-- SHAP Tab -->
+                    <div class="xai-tab-content active" id="shapTab">
+                        <div class="explanation-header">
+                            <p>Feature contributions pushing prediction toward or away from cardiovascular disease risk</p>
+                            <div class="legend">
+                                <span class="legend-item"><span class="legend-dot red"></span>Increases Risk</span>
+                                <span class="legend-item"><span class="legend-dot blue"></span>Decreases Risk</span>
+                            </div>
+                        </div>
+                        <div id="shapPlot" class="plot-container-modern"></div>
+                        <div class="feature-ranking" id="shapFeatures">
+                            <h4>Top Risk Drivers</h4>
+                            <div class="ranking-list" id="shapRankingList"></div>
+                        </div>
+                    </div>
+
+                    <!-- LIME Tab -->
+                    <div class="xai-tab-content" id="limeTab">
+                        <div class="explanation-header">
+                            <p>Local interpretation showing feature importance for this specific prediction</p>
+                        </div>
+                        <div id="limePlot" class="plot-container-modern"></div>
+                        <div class="lime-explanations" id="limeFeatures"></div>
+                    </div>
+                </div>
+
+                <!-- What-If Simulator -->
+                <div class="glass-card simulator-card">
+                    <div class="card-header">
+                        <div class="simulator-title">
+                            <span class="simulator-icon">🎛️</span>
+                            <div>
+                                <h3>What-If Scenario Simulator</h3>
+                                <p class="simulator-subtitle">Adjust parameters to see real-time risk changes</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="simulator-layout">
+                        <div class="simulator-controls">
+                            <div class="slider-group-modern">
+                                <div class="slider-header">
+                                    <label>Cholesterol Level</label>
+                                    <span class="slider-value-badge" id="cholesterolValue">Above Normal</span>
+                                </div>
+                                <input type="range" id="whatifCholesterol" min="1" max="3" value="2" step="1" class="slider-modern">
+                                <div class="slider-labels-modern">
+                                    <span data-value="1">Normal</span>
+                                    <span data-value="2">Above</span>
+                                    <span data-value="3">High</span>
+                                </div>
+                            </div>
+
+                            <div class="slider-group-modern">
+                                <div class="slider-header">
+                                    <label>Systolic BP</label>
+                                    <span class="slider-value-badge" id="systolicValue">130 mmHg</span>
+                                </div>
+                                <input type="range" id="whatifSystolic" min="90" max="180" value="130" step="5" class="slider-modern">
+                            </div>
+
+                            <div class="slider-group-modern">
+                                <div class="slider-header">
+                                    <label>Diastolic BP</label>
+                                    <span class="slider-value-badge" id="diastolicValue">85 mmHg</span>
+                                </div>
+                                <input type="range" id="whatifDiastolic" min="60" max="120" value="85" step="5" class="slider-modern">
+                            </div>
+
+                            <div class="slider-group-modern">
+                                <div class="slider-header">
+                                    <label>Weight</label>
+                                    <span class="slider-value-badge" id="weightValue">75 kg</span>
+                                </div>
+                                <input type="range" id="whatifWeight" min="40" max="150" value="75" step="1" class="slider-modern">
+                            </div>
+
+                            <div class="simulator-toggles">
+                                <label class="toggle-switch-modern">
+                                    <input type="checkbox" id="whatifActive" checked>
+                                    <span class="toggle-slider-modern">
+                                        <span class="toggle-knob"></span>
+                                    </span>
+                                    <span class="toggle-label">Physically Active</span>
+                                </label>
+                                <label class="toggle-switch-modern">
+                                    <input type="checkbox" id="whatifSmoke">
+                                    <span class="toggle-slider-modern">
+                                        <span class="toggle-knob"></span>
+                                    </span>
+                                    <span class="toggle-label">Smoker</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="simulator-results" id="simulatorResults">
+                            <div class="comparison-container">
+                                <h4>Risk Comparison</h4>
+                                <div class="comparison-bars">
+                                    <div class="comp-bar-group">
+                                        <div class="comp-label">
+                                            <span>Original</span>
+                                            <span id="originalRiskValue">0%</span>
+                                        </div>
+                                        <div class="comp-bar-bg">
+                                            <div class="comp-bar-fill original" id="originalBar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="comp-bar-group">
+                                        <div class="comp-label">
+                                            <span>Modified</span>
+                                            <span id="modifiedRiskValue">0%</span>
+                                        </div>
+                                        <div class="comp-bar-bg">
+                                            <div class="comp-bar-fill modified" id="modifiedBar"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="risk-difference" id="riskDifference">
+                                    <span class="diff-label">Difference</span>
+                                    <span class="diff-value" id="diffValue">--</span>
+                                </div>
+                            </div>
+                            <div class="simulator-explanation" id="simulatorExplanation"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="glass-card recommendations-card" id="recommendationsCard" style="display: none;">
+                    <div class="card-header">
+                        <div class="rec-title">
+                            <span class="rec-icon">💡</span>
+                            <div>
+                                <h3>AI Recommendations</h3>
+                                <p class="rec-subtitle">Personalized action plan to reduce cardiovascular risk</p>
+                            </div>
+                        </div>
+                        <button class="refresh-recs-btn" onclick="showCounterfactuals()">
+                            <span>↻</span> Refresh
+                        </button>
+                    </div>
+                    <div class="recommendations-grid" id="recommendationsGrid"></div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="action-bar-modern">
+                    <button class="action-btn-secondary" onclick="showCounterfactuals()">
+                        <span class="btn-icon">💡</span>
+                        <span>Get AI Recommendations</span>
+                    </button>
+                    <button class="action-btn-primary" onclick="generatePDF()">
+                        <span class="btn-icon">📄</span>
+                        <span>Download AI Report</span>
+                    </button>
+                    <button class="action-btn-ghost" onclick="showInput()">
+                        <span class="btn-icon">←</span>
+                        <span>New Analysis</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Counterfactual Modal -->
+        <div class="modal-modern" id="cfModal">
+            <div class="modal-content-modern">
+                <button class="modal-close" onclick="closeCfModal()">
+                    <span>&times;</span>
+                </button>
+                
+                <div class="modal-header">
+                    <div class="modal-icon">🎯</div>
+                    <h2>How to Reduce Your Risk</h2>
+                    <p>AI-generated personalized recommendations</p>
+                </div>
+
+                <div class="cf-loading-modern" id="cfLoading">
+                    <div class="ai-processing">
+                        <div class="brain-animation">
+                            <div class="brain-node"></div>
+                            <div class="brain-node"></div>
+                            <div class="brain-node"></div>
+                            <div class="brain-connections"></div>
+                        </div>
+                        <div class="processing-stages">
+                            <div class="stage" id="stage1">Analyzing patient profile...</div>
+                            <div class="stage" id="stage2">Generating counterfactuals...</div>
+                            <div class="stage" id="stage3">Optimizing recommendations...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cf-results-modern" id="cfResults" style="display: none;">
+                    <div class="cf-main-recommendation" id="cfMainRec"></div>
+                    <div class="cf-alternatives-section" id="cfAlternativesSection"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Processing Overlay -->
+        <div class="ai-overlay" id="aiOverlay">
+            <div class="ai-loader-container">
+                <div class="ai-brain-loader">
+                    <div class="neural-ring"></div>
+                    <div class="neural-ring"></div>
+                    <div class="neural-ring"></div>
+                    <div class="core"></div>
+                </div>
+                <div class="ai-stages">
+                    <div class="stage-item active" id="aiStage1">
+                        <span class="stage-icon">📋</span>
+                        <span class="stage-text">Collecting patient data...</span>
+                    </div>
+                    <div class="stage-item" id="aiStage2">
+                        <span class="stage-icon">🧠</span>
+                        <span class="stage-text">Running XGBoost model...</span>
+                    </div>
+                    <div class="stage-item" id="aiStage3">
+                        <span class="stage-icon">📊</span>
+                        <span class="stage-text">Computing SHAP explanations...</span>
+                    </div>
+                    <div class="stage-item" id="aiStage4">
+                        <span class="stage-icon">💡</span>
+                        <span class="stage-text">Generating recommendations...</span>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="aiProgressBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Container -->
+        <div class="notification-container" id="notificationContainer"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
