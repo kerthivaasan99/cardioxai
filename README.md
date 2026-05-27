@@ -19,7 +19,7 @@
 
 <br/>
 
-🌐 **[Live Demo](https://cardioxai-9iq1.onrender.com)** &nbsp;|&nbsp; 💻 **[GitHub Repository](https://github.com/vikash1602/cardioxai)**
+🌐 **[Live Demo](https://cardioxai-9iq1.onrender.com)** &nbsp;|&nbsp; 💻 **[GitHub Repository](https://github.com/kerthivaasan99/cardioxai)**
 
 ---
 
