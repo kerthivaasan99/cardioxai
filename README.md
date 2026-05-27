@@ -179,7 +179,7 @@ cardioxai/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/vikash1602/cardioxai.git
+git clone https://github.com/kerthivaasan99/cardioxai.git
 cd cardioxai
 ```
 
